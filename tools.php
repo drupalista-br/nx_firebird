@@ -1,15 +1,15 @@
 <?php
 namespace Ecocentauro;
 
-use NXWSClient\tools as nxtools;
-
 class tools {
   protected $cwd;
   protected $config;
   protected $firebird_credentials;
+  protected $db_connection;
+  public $query_result;
 
   /**
-   *
+   * Loads the config.ini.
    */
   public function __construct() {
 	$cwd = pathinfo(__DIR__);
@@ -24,36 +24,58 @@ class tools {
   }
 
   /**
-   * 
+   * Creates a firebird connection resource.
    */
-  public function firebird_db_connect() {
+  private function firebird_db_connect() {
 	$db = $this->config['firebird_credentiais']['db'];
 	$username = $this->config['firebird_credentiais']['username'];
 	$password = $this->config['firebird_credentiais']['password'];
+
+	$this->db_connection = @ibase_connect($db, $username, $password);
+	
+	if (ibase_errmsg()) {
+	  $msg = ibase_errmsg();
+	  $nxtools = new nxtools();
+	  print "SEND AN EMAIL $msg\n";
+	  
+	  throw new \Exception($msg);
+	}
   }
 
   /**
-   * 
+   * Query the database with a pre-defined table/fields from the config file.
+   *
+   * @param String $table
+   *   The config.ini section holding the table details for quering it.
+   *   i.e. [firebird_$table]
    */
-  public function firebird_query($table = 'product') {
-	$table_name = 'EMPLOYEE';
-	$table_fields = array('EMP_NO' => 'test', 'FIRST_NAME' => 'test2');
-	
-	$query_fields = '';
-	foreach ($table_fields as $table_field_name => $nx_table_field_name) {
-	  if (!empty($query_fields)) {
-		$query_fields .= ', ';
-	  }
-	  $query_fields .= $table_field_name;
+  public function firebird_config_query($table) {
+	if (!is_resource($this->db_connection)) {
+	  $this->firebird_db_connect();
 	}
-	
-	$db_connection = @ibase_connect($db, $username, $password);
-	$query = "SELECT $query_fields FROM $table_name";
-	$query = @ibase_query($db_connection, $query);
-	
-	if (!ibase_errmsg()) {
-	  $result = array();
-	  
+
+	if (isset($this->config["firebird_$table"]['table_name'])) {
+	  $table_name = $this->config["firebird_$table"]['table_name'];
+	  $table_fields = $this->config["firebird_$table"]['fields'];
+  
+	  $query_fields = '';
+	  foreach ($table_fields as $table_field_name => $nx_table_field_name) {
+		if (!empty($query_fields)) {
+		  $query_fields .= ', ';
+		}
+		$query_fields .= $table_field_name;
+	  }
+  
+	  $query = "SELECT $query_fields FROM $table_name";
+	  $query = @ibase_query($this->db_connection, $query);
+
+	  if (ibase_errmsg()) {
+		$test = ibase_errmsg();
+		print "SEND AN EMAIL $test\n";
+	  }
+
+  	  $result = array();
+
 	  $row = 0;
 	  while ($row_temp = ibase_fetch_assoc($query)) {
 		foreach($row_temp as $table_field_name => $table_field_value) {
@@ -63,16 +85,35 @@ class tools {
 		}
 		$row++;
 	  }
-	
-	  print_r($result);
-	
-	  ibase_close($db_connection);
+	  $this->query_result = $result;
 	}
 	else {
-	  $test = ibase_errmsg();
-	  print "SEND AN EMAIL $test\n";
+	  print "SEND AN EMAIL\n";
 	}
-  }  
 
+	if (is_resource($this->db_connection)) {
+	  ibase_close($this->db_connection);
+	}
+  }
 
+  /**
+   * Converts the query_result property value to json and saves it into a file
+   * located in the tmp folder.
+   *
+   * @param String $file_name
+   *   The name of the file to be saved in the tmp folder.
+   *   
+   */
+  public function store_query_result($file_name) {
+	$cwd = $this->cwd;
+	$tmp_folder = $cwd . DIRECTORY_SEPARATOR . 'tmp';
+	$tmp_file_path = $tmp_folder . DIRECTORY_SEPARATOR . $file_name;
+
+	$file_content = json_encode($this->query_result);
+
+	if (!file_exists($tmp_folder)) {
+	  mkdir($tmp_folder, 0777, true);
+	}
+	file_put_contents($tmp_file_path, $file_content);
+  }
 }
