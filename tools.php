@@ -39,7 +39,7 @@ class tools {
 	if (ibase_errmsg()) {
 	  $msg = ibase_errmsg();
 	  print "SEND AN EMAIL $msg\n";
-	  
+
 	  throw new \Exception($msg);
 	}
   }
@@ -136,7 +136,7 @@ class tools {
 	$content_current_cron = $this->query_result;
 	$content_difference = array();
 
-	unset($content_current_cron[37]);
+	//unset($content_current_cron[37]);
 
 	if (file_exists($tmp_file_path)) {
 	  $content_last_cron = json_decode(file_get_contents($tmp_file_path), TRUE);
