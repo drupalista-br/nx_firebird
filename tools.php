@@ -3,10 +3,11 @@ namespace Ecocentauro;
 
 class tools {
   protected $cwd;
-  protected $config;
+  public $config;
   protected $firebird_credentials;
   protected $db_connection;
   public $query_result;
+  public $last_cron_difference;
 
   /**
    * Loads the config.ini.
@@ -15,11 +16,13 @@ class tools {
 	$cwd = pathinfo(__DIR__);
 	$this->cwd = $cwd = $cwd['dirname'] . DIRECTORY_SEPARATOR . $cwd['basename'];
 	$config_file = $cwd . DIRECTORY_SEPARATOR . "config.ini";
-
 	$this->config = $config = parse_ini_file($config_file, TRUE);
 
-	if (file_exists($config['general']['nx_wsclient_autoload'])) {
-	  include_once $config['general']['nx_wsclient_autoload'];
+	$nx_wsclient_root_folder = $config['nx_wsclient']['root_folder'];
+	$nx_wsclient_autoload_file = $nx_wsclient_root_folder . DIRECTORY_SEPARATOR . $config['nx_wsclient']['autoload_file'];
+
+	if (file_exists($nx_wsclient_autoload_file)) {
+	  include_once $nx_wsclient_autoload_file;
 	}
   }
 
@@ -57,6 +60,7 @@ class tools {
 	if (isset($this->config["firebird_$table"]['table_name'])) {
 	  $table_name = $this->config["firebird_$table"]['table_name'];
 	  $table_fields = $this->config["firebird_$table"]['fields'];
+	  $field_id = $this->config["firebird_$table"]['field_id'];
   
 	  $query_fields = '';
 	  foreach ($table_fields as $table_field_name => $nx_table_field_name) {
@@ -80,8 +84,9 @@ class tools {
 	  while ($row_temp = ibase_fetch_assoc($query)) {
 		foreach($row_temp as $table_field_name => $table_field_value) {
 		  $nx_table_field_name = $table_fields[$table_field_name];
+		  $field_id_value = $row_temp[$field_id];
 	  
-		  $result[$row][$nx_table_field_name] = $table_field_value;
+		  $result[$field_id_value][$nx_table_field_name] = $table_field_value;
 		}
 		$row++;
 	  }
@@ -102,7 +107,6 @@ class tools {
    *
    * @param String $file_name
    *   The name of the file to be saved in the tmp folder.
-   *   
    */
   public function store_query_result($file_name) {
 	$cwd = $this->cwd;
@@ -115,5 +119,50 @@ class tools {
 	  mkdir($tmp_folder, 0777, true);
 	}
 	file_put_contents($tmp_file_path, $file_content);
+  }
+
+  /**
+   * Search for differences between last's cron result and current's cron
+   * result. If any difference is found then it is saved to
+   * last_cron_difference property.
+   *
+   * @param String $last_cron_file_name
+   *   The file name containing last's cron content.
+   */
+  public function compare_last_cron_result($last_cron_file_name) {
+	$cwd = $this->cwd;
+	$tmp_folder = $cwd . DIRECTORY_SEPARATOR . 'tmp';
+	$tmp_file_path = $tmp_folder . DIRECTORY_SEPARATOR . $last_cron_file_name;
+	$content_last_cron = array();
+	$content_current_cron = $this->query_result;
+	$content_difference = array();
+
+	if (file_exists($tmp_file_path)) {
+	  $content_last_cron = json_decode(file_get_contents($tmp_file_path), TRUE);
+	}
+
+	foreach($content_current_cron as $content_id => $content_row) {
+	  // New content.
+	  if (!array_key_exists($content_id, $content_last_cron)) {
+		$content_difference[] = $content_row;
+	  }
+	  else {
+		// Content update.
+		$diff = array_diff($content_current_cron[$content_id], $content_last_cron[$content_id]);
+		if (!empty($diff)) {
+		  $content_difference[] = $content_row;
+		}
+	  }
+	}
+
+	// Content deleted.
+	/*$rows_deleted = array_diff_key($content_last_cron, $content_current_cron);
+	if (!empty($rows_deleted)) {
+	  foreach($rows_deleted as $content_id => $content_row) {
+		
+	  }
+	}*/
+
+	$this->last_cron_difference = $content_difference;
   }
 }
