@@ -30,9 +30,9 @@ class tools {
    * Creates a firebird connection resource.
    */
   private function firebird_db_connect() {
-	$db = $this->config['firebird_credentiais']['db'];
-	$username = $this->config['firebird_credentiais']['username'];
-	$password = $this->config['firebird_credentiais']['password'];
+	$db = $this->config['firebird_credentials']['db'];
+	$username = $this->config['firebird_credentials']['username'];
+	$password = $this->config['firebird_credentials']['password'];
 
 	$this->db_connection = @ibase_connect($db, $username, $password);
 	
@@ -139,7 +139,7 @@ class tools {
 	//unset($content_current_cron[37]);
 
 	if (file_exists($tmp_file_path)) {
-	  $content_last_cron = json_decode(file_get_contents($tmp_file_path), TRUE);
+	  $content_last_cron = (array) json_decode(file_get_contents($tmp_file_path), TRUE);
 	}
 
 	foreach($content_current_cron as $content_id => $content_row) {
