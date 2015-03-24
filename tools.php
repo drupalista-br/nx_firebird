@@ -38,7 +38,6 @@ class tools {
 	
 	if (ibase_errmsg()) {
 	  $msg = ibase_errmsg();
-	  $nxtools = new nxtools();
 	  print "SEND AN EMAIL $msg\n";
 	  
 	  throw new \Exception($msg);
@@ -137,6 +136,8 @@ class tools {
 	$content_current_cron = $this->query_result;
 	$content_difference = array();
 
+	unset($content_current_cron[37]);
+
 	if (file_exists($tmp_file_path)) {
 	  $content_last_cron = json_decode(file_get_contents($tmp_file_path), TRUE);
 	}
@@ -144,24 +145,24 @@ class tools {
 	foreach($content_current_cron as $content_id => $content_row) {
 	  // New content.
 	  if (!array_key_exists($content_id, $content_last_cron)) {
-		$content_difference[] = $content_row;
+		$content_difference[$content_id] = $content_row;
 	  }
 	  else {
 		// Content update.
 		$diff = array_diff($content_current_cron[$content_id], $content_last_cron[$content_id]);
 		if (!empty($diff)) {
-		  $content_difference[] = $content_row;
+		  $content_difference[$content_id] = $content_row;
 		}
 	  }
 	}
 
 	// Content deleted.
-	/*$rows_deleted = array_diff_key($content_last_cron, $content_current_cron);
+	$rows_deleted = array_diff_key($content_last_cron, $content_current_cron);
 	if (!empty($rows_deleted)) {
 	  foreach($rows_deleted as $content_id => $content_row) {
-		
+		$content_difference['deleted'][$content_id] = $content_row;
 	  }
-	}*/
+	}
 
 	$this->last_cron_difference = $content_difference;
   }
