@@ -121,12 +121,12 @@ class tools {
   }
 
   /**
-   * Search for differences between last's cron result and current's cron
+   * Search for differences between last cron result and current cron
    * result. If any difference is found then it is saved to
    * last_cron_difference property.
    *
    * @param String $last_cron_file_name
-   *   The file name containing last's cron content.
+   *   The file name containing last cron content.
    */
   public function compare_last_cron_result($last_cron_file_name) {
 	$cwd = $this->cwd;

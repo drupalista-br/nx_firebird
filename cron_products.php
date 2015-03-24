@@ -46,5 +46,6 @@ if (!empty($products->last_cron_difference)) {
   }
 
   // Call NX WSClient sync.
-  passthru("php $nx_wsclient_root_folder/cli.php sincronizar");
+  $cli = "$nx_wsclient_root_folder$separator" . "cli.php";
+  passthru("php $cli sincronizar");
 }
