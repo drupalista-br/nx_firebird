@@ -10,5 +10,9 @@ if (file_exists("tmp/commit.txt")) {
 if ($commit_last != $commit_current) {
   passthru("git pull origin master &&
 		   git checkout $commit_current");
+
+  if (!file_exists($tmp_folder)) {
+	mkdir($tmp_folder, 0777, true);
+  }
   file_put_contents("tmp/commit.txt", $commit_current);
 }
