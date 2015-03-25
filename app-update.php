@@ -12,7 +12,7 @@ if ($commit_last != $commit_current) {
 		   git checkout $commit_current");
 
   if (!file_exists("tmp")) {
-	mkdir($tmp_folder, 0777, true);
+	mkdir("tmp", 0777, true);
   }
   file_put_contents("tmp/commit.txt", $commit_current);
 }
