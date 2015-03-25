@@ -32,6 +32,7 @@ if (!empty($products->last_cron_difference)) {
   if (isset($diff['deleted'])) {
 	foreach($diff['deleted'] as $product_id => $product) {
 	  $product['qtde_em_estoque'] = 0;
+	  $product['preco'] = number_format($product['preco'], 2, '', '');
 	  $product['cod_cidade'] = $nx_cod_cidade;
 
 	  $ini_writter->toFile("$nx_produto_folder$separator$product_id.txt", $product);
@@ -41,6 +42,7 @@ if (!empty($products->last_cron_difference)) {
 
   // Insertions and Updates.
   foreach($diff as $product_id => $product) {
+	$product['preco'] = number_format($product['preco'], 2, '', '');
 	$product['cod_cidade'] = $nx_cod_cidade;
 	$ini_writter->toFile("$nx_produto_folder$separator$product_id.txt", $product);
   }
