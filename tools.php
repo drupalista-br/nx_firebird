@@ -84,8 +84,8 @@ class tools {
 		foreach($row_temp as $table_field_name => $table_field_value) {
 		  $nx_table_field_name = $table_fields[$table_field_name];
 		  $field_id_value = $row_temp[$field_id];
-	  
-		  $result[$field_id_value][$nx_table_field_name] = $table_field_value;
+
+		  $result[$field_id_value][$nx_table_field_name] = iconv('UTF-8','ASCII//TRANSLIT', trim($table_field_value));
 		}
 		$row++;
 	  }
