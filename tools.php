@@ -1,5 +1,6 @@
 <?php
 namespace Ecocentauro;
+setlocale(LC_CTYPE, 'pt_BR');
 
 class tools {
   protected $cwd;
