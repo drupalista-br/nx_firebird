@@ -2,6 +2,8 @@
 use Ecocentauro\tools as tools,
 	Zend\Config\Writer\Ini as IniWriter;
 
+setlocale(LC_CTYPE, 'pt_BR');
+
 include_once 'tools.php';
 $separator = DIRECTORY_SEPARATOR;
 
@@ -44,6 +46,7 @@ if (!empty($products->last_cron_difference)) {
   foreach($diff as $product_id => $product) {
 	$product['preco'] = number_format($product['preco'], 2, '', '');
 	$product['cod_cidade'] = $nx_cod_cidade;
+	$product['nome'] = str_replace('"', '', $product['nome']);
 	$ini_writter->toFile("$nx_produto_folder$separator$product_id.txt", $product);
   }
 

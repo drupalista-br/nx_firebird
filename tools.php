@@ -80,7 +80,6 @@ class tools {
 
   	  $result = array();
 
-	  $replaces = array("'" => '', "`" => '', '"' => '');
 	  $row = 0;
 	  while ($row_temp = ibase_fetch_assoc($query)) {
 		foreach($row_temp as $table_field_name => $table_field_value) {
