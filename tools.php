@@ -35,8 +35,8 @@ class tools {
 	$username = $this->config['firebird_credentials']['username'];
 	$password = $this->config['firebird_credentials']['password'];
 
-	$this->db_connection = @ibase_connect($db, $username, $password);
-	
+	$this->db_connection = @ibase_connect($db, $username, $password, 'ISO8859_1');
+
 	if (ibase_errmsg()) {
 	  $msg = ibase_errmsg();
 	  print "SEND AN EMAIL $msg\n";
@@ -80,13 +80,14 @@ class tools {
 
   	  $result = array();
 
+	  $replaces = array("'" => '', "`" => '', '"' => '');
 	  $row = 0;
 	  while ($row_temp = ibase_fetch_assoc($query)) {
 		foreach($row_temp as $table_field_name => $table_field_value) {
 		  $nx_table_field_name = $table_fields[$table_field_name];
-		  $field_id_value = iconv('UTF-8','ASCII//TRANSLIT', trim($row_temp[$field_id]));
+		  $field_id_value = $row_temp[$field_id];
 
-		  $result[$field_id_value][$nx_table_field_name] = iconv('UTF-8','ASCII//TRANSLIT', trim($table_field_value));
+		  $result[$field_id_value][$nx_table_field_name] = strtr($table_field_value, $replaces); //iconv('UTF-8','UTF-8//TRANSLIT', trim($table_field_value));
 		}
 		$row++;
 	  }
