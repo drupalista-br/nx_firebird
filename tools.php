@@ -87,7 +87,7 @@ class tools {
 		  $nx_table_field_name = $table_fields[$table_field_name];
 		  $field_id_value = $row_temp[$field_id];
 
-		  $result[$field_id_value][$nx_table_field_name] = strtr($table_field_value, $replaces); //iconv('UTF-8','UTF-8//TRANSLIT', trim($table_field_value));
+		  $result[$field_id_value][$nx_table_field_name] = utf8_encode(trim($table_field_value)); //iconv('UTF-8', 'ASCII//TRANSLIT', trim($table_field_value)); //iconv('UTF-8','UTF-8//TRANSLIT', strtr(trim($table_field_value), $replaces));
 		}
 		$row++;
 	  }
