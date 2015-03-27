@@ -36,6 +36,7 @@ if (!empty($products->last_cron_difference)) {
 	  $product['qtde_em_estoque'] = 0;
 	  $product['preco'] = number_format($product['preco'], 2, '', '');
 	  $product['cod_cidade'] = $nx_cod_cidade;
+	  $product['ativo'] = 0;
 
 	  $ini_writter->toFile("$nx_produto_folder$separator$product_id.txt", $product);
 	}
@@ -47,6 +48,15 @@ if (!empty($products->last_cron_difference)) {
 	$product['preco'] = number_format($product['preco'], 2, '', '');
 	$product['cod_cidade'] = $nx_cod_cidade;
 	$product['nome'] = str_replace('"', '', $product['nome']);
+
+	switch($product['ativo']) {
+	  case 'S':
+		$product['ativo'] = 1;
+	  break;
+	  case 'N':
+		$product['ativo'] = 0;
+	  break;
+	}
 	$ini_writter->toFile("$nx_produto_folder$separator$product_id.txt", $product);
   }
 
