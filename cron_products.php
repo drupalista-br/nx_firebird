@@ -57,6 +57,12 @@ if (!empty($products->last_cron_difference)) {
 		$product['ativo'] = 0;
 	  break;
 	}
+
+	// Make sure no negative value is sent for stock.
+	if ($product['qtde_em_estoque'] < 0) {
+	  $product['qtde_em_estoque'] = 0;
+	}
+
 	$ini_writter->toFile("$nx_produto_folder$separator$product_id.txt", $product);
   }
 
