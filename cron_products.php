@@ -17,16 +17,16 @@ if (!empty($products->last_cron_difference)) {
 
   // Get NX Wsclient Config.
   $nx_wsclient_root_folder = $products->config['nx_wsclient']['root_folder'];
-  $nx_wsclient_config_file = $nx_wsclient_root_folder . DIRECTORY_SEPARATOR . 'config.ini';
+  $nx_wsclient_config_file = "$nx_wsclient_root_folder{$separator}config.ini";
   $nx_wsclient_config = parse_ini_file($nx_wsclient_config_file, TRUE);
   $nx_cod_cidade = $products->config['nx_wsclient']['cod_cidade'];
   
   // Get NX Wsclient Produto Folder.
-  $nx_dados_folder = $products->config['nx_wsclient']['root_folder'] . DIRECTORY_SEPARATOR . 'dados';
+  $nx_dados_folder = "{$products->config['nx_wsclient']['root_folder']}{$separator}dados";
   if (isset($nx_wsclient_config['pastas']['dados']) && file_exists($nx_wsclient_config['pastas']['dados'])) {
 	$nx_dados_folder = $nx_wsclient_config['pastas']['dados'];
   }
-  $nx_produto_folder = $nx_dados_folder . DIRECTORY_SEPARATOR . 'produto';
+  $nx_produto_folder = "$nx_dados_folder{$separator}produto";
 
   $ini_writter = new IniWriter();
 
@@ -38,7 +38,7 @@ if (!empty($products->last_cron_difference)) {
 	  $product['cod_cidade'] = $nx_cod_cidade;
 	  $product['ativo'] = 0;
 
-	  $ini_writter->toFile("$nx_produto_folder$separator$product_id.txt", $product);
+	  $ini_writter->toFile("$nx_produto_folder{$separator}$product_id.txt", $product);
 	}
 	unset($diff['deleted']);
   }
@@ -58,15 +58,15 @@ if (!empty($products->last_cron_difference)) {
 	  break;
 	}
 
-	// Make sure no negative value is sent for stock.
+	// Make sure no negative value is sent for stock field.
 	if ($product['qtde_em_estoque'] < 0) {
 	  $product['qtde_em_estoque'] = 0;
 	}
 
-	$ini_writter->toFile("$nx_produto_folder$separator$product_id.txt", $product);
+	$ini_writter->toFile("$nx_produto_folder{$separator}$product_id.txt", $product);
   }
 
   // Call NX WSClient sync.
-  $cli = "$nx_wsclient_root_folder$separator" . "cli.php";
+  $cli = "$nx_wsclient_root_folder{$separator}cli.php";
   passthru("php $cli sincronizar");
 }
